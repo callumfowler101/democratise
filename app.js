@@ -123,6 +123,7 @@ app.action("answers_log", async ({ body, ack, say }) => {
 app.action("date_log", async ({ body, ack, say }) => {
   await ack()
   const _date = parseResults(body.state.values, "date_log", true)[0]
+  ballotObject.completionDate = _date
 })
 
 const main = async () => {
