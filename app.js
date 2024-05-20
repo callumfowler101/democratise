@@ -103,7 +103,7 @@ app.action("num_of_answers_log", async ({ body, ack, say }) => {
 app.action("answers_log", async ({ body, ack, say }) => {
   await ack()
   const _answersArr = parseResults(body.state.values, "answers_log")
-  console.log(_answersArr)
+  ballotObject.answers = _answersArr
 })
 
 const main = async () => {
