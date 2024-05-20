@@ -17,21 +17,45 @@ const ballotObject = {
   mandatory: "",
 }
 
+const generateBlock = (title, blockType, actionId, firesAction = false) => {
+  const tempObject = {
+    type: "",
+    element: {
+      type: "",
+      action_id: actionId,
+    },
+    label: {
+      type: "",
+      text: title,
+      emoji: true,
+    },
+  }
+
+  if (firesAction) tempObject.dispatch_action = true
+
+  switch (blockType) {
+    case "text_input":
+      tempObject.type = "input"
+      tempObject.element.type = "plain_text_input"
+      tempObject.label.type = "plain_text"
+      break
+    default:
+      break
+  }
+
+  return tempObject
+}
+
 const generateAnswerBlocks = (numOfAnswers) => {
   const answersBlock = []
   for (let i = 0; i < numOfAnswers; i++) {
-    answersBlock.push({
-      type: "input",
-      element: {
-        type: "plain_text_input",
-        action_id: "answers_log",
-      },
-      label: {
-        type: "plain_text",
-        text: `Answer ${i + 1}`,
-        emoji: true,
-      },
-    })
+    const answerBlockTemplate = generateBlock(
+      `Answer ${i + 1}`,
+      "text_input",
+      "answers_log"
+    )
+
+    answersBlock.push(answerBlockTemplate)
   }
   answersBlock[answersBlock.length - 1]["dispatch_action"] = true
   return answersBlock
@@ -46,22 +70,10 @@ const parseResults = (values, actionKey) => {
 }
 
 app.message("hello", async ({ message, say }) => {
+  const block = generateBlock("Question", "text_input", "question_log", true)
+  console.log(block)
   await say({
-    blocks: [
-      {
-        dispatch_action: true,
-        type: "input",
-        element: {
-          type: "plain_text_input",
-          action_id: "question_log",
-        },
-        label: {
-          type: "plain_text",
-          text: "Question",
-          emoji: true,
-        },
-      },
-    ],
+    blocks: [block],
     text: "fallback",
   })
 })
@@ -71,22 +83,15 @@ app.action("question_log", async ({ body, ack, say }) => {
 
   const _question = parseResults(body.state.values, "question_log")[0]
   ballotObject.question = _question
+
+  const block = generateBlock(
+    "Number of Answers",
+    "text_input",
+    "num_of_answers_log",
+    true
+  )
   await say({
-    blocks: [
-      {
-        dispatch_action: true,
-        type: "input",
-        element: {
-          type: "plain_text_input",
-          action_id: "num_of_answers_log",
-        },
-        label: {
-          type: "plain_text",
-          text: "Number of Answers",
-          emoji: true,
-        },
-      },
-    ],
+    blocks: [block],
     text: "fallback",
   })
 })
