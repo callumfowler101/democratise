@@ -67,10 +67,13 @@ const generateAnswerBlocks = (numOfAnswers) => {
   return answersBlock
 }
 
-const parseResults = (values, actionKey) => {
+const parseResults = (values, actionKey, isDatePicker) => {
   const results = []
   Object.values(values).forEach((e) => {
-    results.push(e[actionKey].value)
+    const result = isDatePicker
+      ? e[actionKey].selected_date
+      : e[actionKey].value
+    results.push(result)
   })
   return results
 }
@@ -115,6 +118,11 @@ app.action("answers_log", async ({ body, ack, say }) => {
   ballotObject.answers = _answersArr
   const block = generateBlock("Select a deadline", "date_input", "date_log")
   await say({ blocks: [block], text: "fallback" })
+})
+
+app.action("date_log", async ({ body, ack, say }) => {
+  await ack()
+  const _date = parseResults(body.state.values, "date_log", true)[0]
 })
 
 const main = async () => {
