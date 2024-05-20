@@ -18,32 +18,38 @@ const ballotObject = {
 }
 
 const generateBlock = (title, blockType, actionId, firesAction = false) => {
-  const tempObject = {
-    type: "",
+  const tempObj = {
+    type: "input",
     element: {
-      type: "",
+      type: "plain_text_input",
       action_id: actionId,
     },
     label: {
-      type: "",
+      type: "plain_text",
       text: title,
       emoji: true,
     },
   }
 
-  if (firesAction) tempObject.dispatch_action = true
+  if (firesAction) tempObj.dispatch_action = true
 
   switch (blockType) {
     case "text_input":
-      tempObject.type = "input"
-      tempObject.element.type = "plain_text_input"
-      tempObject.label.type = "plain_text"
+      tempObj.element.type = "plain_text_input"
       break
+    case "date_input":
+      tempObj.element.type = "datepicker"
+      tempObj.element.initial_date = "2024-05-20"
+      tempObj.element.placeholder = {
+        type: "plain_text",
+        text: "Select a date",
+        emoji: true,
+      }
     default:
       break
   }
 
-  return tempObject
+  return tempObj
 }
 
 const generateAnswerBlocks = (numOfAnswers) => {
@@ -71,7 +77,6 @@ const parseResults = (values, actionKey) => {
 
 app.message("hello", async ({ message, say }) => {
   const block = generateBlock("Question", "text_input", "question_log", true)
-  console.log(block)
   await say({
     blocks: [block],
     text: "fallback",
@@ -99,7 +104,6 @@ app.action("question_log", async ({ body, ack, say }) => {
 app.action("num_of_answers_log", async ({ body, ack, say }) => {
   await ack()
   const _numOfAnswers = parseResults(body.state.values, "num_of_answers_log")[0]
-
   ballotObject.numOfAnswers = _numOfAnswers
   const blocks = generateAnswerBlocks(ballotObject.numOfAnswers)
   await say({ blocks, text: "fallback" })
@@ -109,6 +113,8 @@ app.action("answers_log", async ({ body, ack, say }) => {
   await ack()
   const _answersArr = parseResults(body.state.values, "answers_log")
   ballotObject.answers = _answersArr
+  const block = generateBlock("Select a deadline", "date_input", "date_log")
+  await say({ blocks: [block], text: "fallback" })
 })
 
 const main = async () => {
