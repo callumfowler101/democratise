@@ -52,7 +52,7 @@ const generateBlock = (title, blockType, actionId, firesAction = false) => {
   return tempObj
 }
 
-const generateOptionsBlock = (title, options) => {
+const generateOptionsBlock = (title, options, actionId) => {
   const tempObj = {
     type: "input",
     element: {
@@ -63,6 +63,7 @@ const generateOptionsBlock = (title, options) => {
         emoji: true,
       },
       options: [],
+      action_id: actionId,
     },
     label: {
       type: "plain_text",
@@ -84,8 +85,6 @@ const generateOptionsBlock = (title, options) => {
     tempObj.element.options.push(_object)
   }
 
-  console.log(tempObj)
-
   return tempObj
 }
 
@@ -104,12 +103,15 @@ const generateAnswerBlocks = (numOfAnswers) => {
   return answersBlock
 }
 
-const parseResults = (values, actionKey, isDatePicker) => {
+const parseResults = (values, actionKey, deepKey) => {
   const results = []
   Object.values(values).forEach((e) => {
-    const result = isDatePicker
-      ? e[actionKey].selected_date
-      : e[actionKey].value
+    let result
+    if (deepKey) {
+      result = e[actionKey][deepKey]
+    } else {
+      result = e[actionKey].value
+    }
     results.push(result)
   })
   return results
@@ -159,13 +161,28 @@ app.action("answers_log", async ({ body, ack, say }) => {
 
 app.action("date_log", async ({ body, ack, say }) => {
   await ack()
-  const _date = parseResults(body.state.values, "date_log", true)[0]
+  const _date = parseResults(body.state.values, "date_log", "selected_date")[0]
   ballotObject.completionDate = _date
   const channelList = await app.client.conversations.list()
   const channels = channelList.channels
   const channelNames = channels.map((e) => e.name)
-  const optionsBlock = generateOptionsBlock("Choose a channel", channelNames)
+  const optionsBlock = generateOptionsBlock(
+    "Choose a channel",
+    channelNames,
+    "channel_log"
+  )
   await say({ blocks: [optionsBlock], text: "fallback" })
+})
+
+app.action("channel_log", async ({ body, ack, say }) => {
+  await ack()
+  console.log(body.state.values)
+  const _channel = parseResults(
+    body.state.values,
+    "channel_log",
+    "selected_option"
+  )[0].text.text
+  ballotObject.channel = _channel
 })
 
 const main = async () => {
