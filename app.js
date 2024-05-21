@@ -14,7 +14,6 @@ const ballotObject = {
   completionDate: "",
   additionalThresh: 0,
   channel: "",
-  mandatory: "",
 }
 
 const generateBlock = (title, blockType, actionId, firesAction = false) => {
