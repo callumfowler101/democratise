@@ -8,12 +8,11 @@ const app = new App({
 })
 
 const ballotObject = {
-  question: "",
-  numOfAnswers: 0,
-  answers: [],
-  completionDate: "",
-  additionalThresh: 0,
-  channel: "",
+  Question: "",
+  Number_of_Answers: 0,
+  Answers: [],
+  Completion_Date: "",
+  Channel: "",
 }
 
 const generateBlock = (title, blockType, actionId, firesAction = false) => {
@@ -191,7 +190,7 @@ app.action("question_log", async ({ body, ack, say }) => {
   await ack()
 
   const _question = parseResults(body.state.values, "question_log")[0]
-  ballotObject.question = _question
+  ballotObject.Question = _question
 
   const block = generateBlock(
     "Number of Answers",
@@ -208,7 +207,7 @@ app.action("question_log", async ({ body, ack, say }) => {
 app.action("num_of_answers_log", async ({ body, ack, say }) => {
   await ack()
   const _numOfAnswers = parseResults(body.state.values, "num_of_answers_log")[0]
-  ballotObject.numOfAnswers = _numOfAnswers
+  ballotObject.Number_of_Answers = _numOfAnswers
   const blocks = generateAnswerBlocks(ballotObject.numOfAnswers)
   await say({ blocks, text: "fallback" })
 })
@@ -216,7 +215,7 @@ app.action("num_of_answers_log", async ({ body, ack, say }) => {
 app.action("answers_log", async ({ body, ack, say }) => {
   await ack()
   const _answersArr = parseResults(body.state.values, "answers_log")
-  ballotObject.answers = _answersArr
+  ballotObject.Answers = _answersArr
   const block = generateBlock("Select a deadline", "date_input", "date_log")
   await say({ blocks: [block], text: "fallback" })
 })
@@ -224,7 +223,7 @@ app.action("answers_log", async ({ body, ack, say }) => {
 app.action("date_log", async ({ body, ack, say }) => {
   await ack()
   const _date = parseResults(body.state.values, "date_log", "selected_date")[0]
-  ballotObject.completionDate = _date
+  ballotObject.Completion_Date = _date
   const channelList = await app.client.conversations.list()
   const channels = channelList.channels
   const channelNames = channels.map((e) => e.name)
@@ -244,7 +243,7 @@ app.action("channel_log", async ({ body, ack, say }) => {
     "channel_log",
     "selected_option"
   )[0].text.text
-  ballotObject.channel = _channel
+  ballotObject.Channel = _channel
   const blocks = generateRecapBlock(
     "Please confirm all the ballot information is correct",
     ballotObject,
@@ -256,6 +255,13 @@ app.action("channel_log", async ({ body, ack, say }) => {
     blocks: blocks,
     text: "fallback",
   })
+})
+
+app.action("send_ballot", async ({ body, ack, say }) => {
+  await ack()
+})
+app.action("reenter_ballot", async ({ body, ack, say }) => {
+  await ack()
 })
 
 const main = async () => {
