@@ -13,7 +13,7 @@ const ballotObject = {
   answers: [],
   completionDate: "",
   additionalThresh: 0,
-  team: "",
+  channel: "",
   mandatory: "",
 }
 
@@ -48,6 +48,43 @@ const generateBlock = (title, blockType, actionId, firesAction = false) => {
     default:
       break
   }
+
+  return tempObj
+}
+
+const generateOptionsBlock = (title, options) => {
+  const tempObj = {
+    type: "input",
+    element: {
+      type: "static_select",
+      placeholder: {
+        type: "plain_text",
+        text: "Select an option",
+        emoji: true,
+      },
+      options: [],
+    },
+    label: {
+      type: "plain_text",
+      text: title,
+      emoji: true,
+    },
+  }
+
+  for (let i = 0; i < options.length; i++) {
+    const _object = {
+      text: {
+        type: "plain_text",
+        text: options[i],
+        emoji: true,
+      },
+      value: `value-${i}`,
+    }
+
+    tempObj.element.options.push(_object)
+  }
+
+  console.log(tempObj)
 
   return tempObj
 }
@@ -124,6 +161,11 @@ app.action("date_log", async ({ body, ack, say }) => {
   await ack()
   const _date = parseResults(body.state.values, "date_log", true)[0]
   ballotObject.completionDate = _date
+  const channelList = await app.client.conversations.list()
+  const channels = channelList.channels
+  const channelNames = channels.map((e) => e.name)
+  const optionsBlock = generateOptionsBlock("Choose a channel", channelNames)
+  await say({ blocks: [optionsBlock], text: "fallback" })
 })
 
 const main = async () => {
