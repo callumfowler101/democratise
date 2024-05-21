@@ -51,6 +51,69 @@ const generateBlock = (title, blockType, actionId, firesAction = false) => {
   return tempObj
 }
 
+const generateRecapBlock = (
+  title,
+  ballotObj,
+  correctActionId,
+  incorrectActionId
+) => {
+  const blocks = []
+  const headerObj = {
+    type: "header",
+    text: {
+      type: "plain_text",
+      text: title,
+      emoji: true,
+    },
+  }
+
+  blocks.push(headerObj)
+
+  for (const [key, value] of Object.entries(ballotObj)) {
+    const obj = {
+      type: "context",
+      elements: [
+        {
+          type: "plain_text",
+          text: `${key}: ${value}`,
+          emoji: true,
+        },
+      ],
+    }
+    blocks.push(obj)
+  }
+
+  const buttons = {
+    type: "actions",
+    elements: [
+      {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text: "Correct",
+          emoji: true,
+        },
+        value: "confirm_ballot",
+        action_id: correctActionId,
+      },
+      {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text: "Incorrect",
+          emoji: true,
+        },
+        value: "decline_ballot",
+        action_id: incorrectActionId,
+      },
+    ],
+  }
+
+  blocks.push(buttons)
+
+  return blocks
+}
+
 const generateOptionsBlock = (title, options, actionId) => {
   const tempObj = {
     type: "input",
@@ -182,6 +245,17 @@ app.action("channel_log", async ({ body, ack, say }) => {
     "selected_option"
   )[0].text.text
   ballotObject.channel = _channel
+  const blocks = generateRecapBlock(
+    "Please confirm all the ballot information is correct",
+    ballotObject,
+    "send_ballot",
+    "reenter_ballot"
+  )
+
+  await say({
+    blocks: blocks,
+    text: "fallback",
+  })
 })
 
 const main = async () => {
