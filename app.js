@@ -208,7 +208,7 @@ app.action("num_of_answers_log", async ({ body, ack, say }) => {
   await ack()
   const _numOfAnswers = parseResults(body.state.values, "num_of_answers_log")[0]
   ballotObject.Number_of_Answers = _numOfAnswers
-  const blocks = generateAnswerBlocks(ballotObject.numOfAnswers)
+  const blocks = generateAnswerBlocks(ballotObject.Number_of_Answers)
   await say({ blocks, text: "fallback" })
 })
 
@@ -259,6 +259,7 @@ app.action("channel_log", async ({ body, ack, say }) => {
 
 app.action("send_ballot", async ({ body, ack, say }) => {
   await ack()
+  client.chat_postMessage()
 })
 app.action("reenter_ballot", async ({ body, ack, say }) => {
   await ack()
