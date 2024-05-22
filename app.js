@@ -178,6 +178,15 @@ const parseResults = (values, actionKey, deepKey) => {
   return results
 }
 
+const getChannelId = (chanName, chanList) => {
+  for (let i = 0; i < chanList.length; i++) {
+    const chanInfo = chanList[i]
+    if (chanInfo.name === chanName) {
+      return chanInfo.id
+    }
+  }
+}
+
 app.message("hello", async ({ message, say }) => {
   const block = generateBlock("Question", "text_input", "question_log", true)
   await say({
@@ -259,8 +268,15 @@ app.action("channel_log", async ({ body, ack, say }) => {
 
 app.action("send_ballot", async ({ body, ack, say }) => {
   await ack()
-  client.chat_postMessage()
+  const channelList = (await app.client.conversations.list()).channels
+  const chanId = getChannelId(ballotObject.Channel, channelList)
+  const chanMembers = (
+    await app.client.conversations.members({
+      channel: chanId,
+    })
+  ).members
 })
+
 app.action("reenter_ballot", async ({ body, ack, say }) => {
   await ack()
 })
