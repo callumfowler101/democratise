@@ -328,7 +328,7 @@ app.action("send_ballot", async ({ body, ack, say }) => {
     ballotObject.Question,
     ballotObject.Answers,
     ballotObject.Completion_Date,
-    "log_results"
+    "log_result"
   )
 
   await app.client.chat.postMessage({
@@ -337,6 +337,11 @@ app.action("send_ballot", async ({ body, ack, say }) => {
     text: "fallback",
   })
   console.log("message sent")
+})
+
+app.action("log_result", async ({ body, ack, say }) => {
+  await ack()
+  await say({ text: "Thank you for voting!" })
 })
 
 app.action("reenter_ballot", async ({ body, ack, say }) => {
