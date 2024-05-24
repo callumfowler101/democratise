@@ -15,6 +15,54 @@ const ballotObject = {
   Channel: "",
 }
 
+const generatePollBlock = (question, answers, endDate, actionId) => {
+  const blockArr = [
+    {
+      type: "header",
+      text: {
+        type: "plain_text",
+        text: question,
+        emoji: true,
+      },
+    },
+    {
+      type: "section",
+      text: {
+        type: "plain_text",
+        text: `Please vote by clicking the option below. You have until ${endDate} to cast your vote.`,
+        emoji: true,
+      },
+    },
+    {
+      type: "divider",
+    },
+  ]
+
+  for (let i = 0; i < answers.length; i++) {
+    const answerBlock = {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `${answers[i]}`,
+      },
+      accessory: {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text: "Vote",
+          emoji: true,
+        },
+        value: `vote_option_${i}`,
+        action_id: actionId,
+      },
+    }
+
+    blockArr.push(answerBlock)
+  }
+
+  return blockArr
+}
+
 const generateBlock = (title, blockType, actionId, firesAction = false) => {
   const tempObj = {
     type: "input",
@@ -276,9 +324,17 @@ app.action("send_ballot", async ({ body, ack, say }) => {
     })
   ).members
 
+  const pollBlock = generatePollBlock(
+    ballotObject.Question,
+    ballotObject.Answers,
+    ballotObject.Completion_Date,
+    "log_results"
+  )
+
   await app.client.chat.postMessage({
     channel: chanMembers[0],
-    blocks: [],
+    blocks: pollBlock,
+    text: "fallback",
   })
   console.log("message sent")
 })
