@@ -275,6 +275,12 @@ app.action("send_ballot", async ({ body, ack, say }) => {
       channel: chanId,
     })
   ).members
+
+  await app.client.chat.postMessage({
+    channel: chanMembers[0],
+    blocks: [],
+  })
+  console.log("message sent")
 })
 
 app.action("reenter_ballot", async ({ body, ack, say }) => {
